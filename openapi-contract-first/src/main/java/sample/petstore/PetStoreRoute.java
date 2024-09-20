@@ -14,6 +14,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package sample.petstore;
 
 import org.apache.camel.builder.RouteBuilder;
@@ -37,24 +38,30 @@ public class PetStoreRoute extends RouteBuilder {
     public void configure() throws Exception {
         // turn on json binding and scan for POJO classes in the model package
         restConfiguration().bindingMode(RestBindingMode.json)
-                .bindingPackageScan("sample.petstore.model");
+            .bindingPackageScan("sample.petstore.model");
 
         rest().openApi().specification("petstore.json").missingOperation("ignore");
+        rest().openApi().specification("camelGOP-openapi-v1.json").missingOperation("ignore");
 
         from("direct:getPetById")
-                .process(e -> {
-                    // build response body as POJO
-                    Pet pet = new Pet();
-                    pet.setId(e.getMessage().getHeader("petId", long.class));
-                    pet.setName(petName);
-                    pet.setStatus(StatusEnum.AVAILABLE);
-                    e.getMessage().setBody(pet);
-                });
+            .process(e -> {
+                // build response body as POJO
+                Pet pet = new Pet();
+                pet.setId(e.getMessage().getHeader("petId", long.class));
+                pet.setName(petName);
+                pet.setStatus(StatusEnum.AVAILABLE);
+                e.getMessage().setBody(pet);
+            });
 
         from("direct:updatePet")
-                .process(e -> {
-                    Pet pet = e.getMessage().getBody(Pet.class);
-                    pet.setStatus(StatusEnum.PENDING);
-                });
+            .process(e -> {
+                Pet pet = e.getMessage().getBody(Pet.class);
+                pet.setStatus(StatusEnum.PENDING);
+            });
+
+        from("direct:putCoorder")
+            .process(e ->
+                System.out.println(e.getMessage().getBody(String.class)
+                ));
     }
 }

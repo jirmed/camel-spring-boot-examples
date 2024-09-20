@@ -36,6 +36,8 @@
         <category>Rest</category>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <maven.compiler.source>21</maven.compiler.source>
+        <maven.compiler.target>21</maven.compiler.target>
     </properties>
 
     <dependencyManagement>
@@ -146,6 +148,27 @@
                             <generateModels>true</generateModels>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>gop</id>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                        <configuration>
+                            <!-- we only want to generate the model classes for spring boot -->
+                            <language>spring</language>
+                            <library>spring-boot3</library>
+                            <inputSpec>${project.basedir}/src/main/resources/camelGOP-openapi-v1.json</inputSpec>
+                            <modelPackage>sample.petstore.model</modelPackage>
+                            <generateApis>false</generateApis>
+                            <generateApiDocumentation>false</generateApiDocumentation>
+                            <generateModelDocumentation>false</generateModelDocumentation>
+                            <generateApiTests>false</generateApiTests>
+                            <generateModelTests>false</generateModelTests>
+                            <generateSupportingFiles>false</generateSupportingFiles>
+                            <generateModels>true</generateModels>
+                        </configuration>
+                    </execution>
+
                 </executions>
             </plugin>
             <!-- include the model classes to source folder -->
