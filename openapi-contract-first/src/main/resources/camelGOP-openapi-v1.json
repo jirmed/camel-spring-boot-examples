@@ -1,0 +1,4232 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "CamelGOP API v1",
+    "description": "Documentation of communication with the K2 system.",
+    "contact": {
+      "email": "info@orax.cz"
+    },
+    "version": "1.0.34"
+  },
+  "servers": [
+    {
+      "url": "http://liv63.brno.bvv.cz:8080/api/rest/gop/v1/",
+      "description": "for the production server"
+    },
+    {
+      "url": "http:/liv56.brno.bvv.cz:18080/api/rest/gop/v1/",
+      "description": "for the test server"
+    },
+    {
+      "url": "/api/rest/gop/v1/",
+      "description": "for localhost"
+    }
+  ],
+  "tags": [
+    {
+      "name": "coorderdet",
+      "description": "Získání detailních skutečných nákladů a výnosů pro CO zakázku"
+    },
+    {
+      "name": "debt",
+      "description": "Získání nevyrovnaných dokladů"
+    },
+    {
+      "name": "fnucetnistav",
+      "description": "Získá aktuálně platné počty produktů dle skladové evidence pro předané pole produktů. Je řešeno metodou POST, kvůli délce URL při velkém počtu požadovaných produktů. Funkčně se ale jedná o metodu GET"
+    },
+    {
+      "name": "inventory",
+      "description": "Získání aktuálních skladových cen"
+    },
+    {
+      "name": "lasbe",
+      "description": "Vrací se datum posledního zpracování dokladů banky"
+    },
+    {
+      "name": "listdocuments",
+      "description": "Získání seznamu faktur k odbytové zakázce"
+    },
+    {
+      "name": "rentals",
+      "description": "List of rental items for the selected commission."
+    },
+    {
+      "name": "revenue",
+      "description": "Získání skutečných nákladů a výnosů pro CO zakázku."
+    },
+    {
+      "name": "showdoc",
+      "description": "Získání dokumentu (faktury. přílohy nebo nákladové objednávky) ve formátu PDF."
+    },
+    {
+      "name": "accenergy",
+      "description": "Uložení informace o spotřebě dle objednaných přívodů (elektřina, voda, vzduch)"
+    },
+    {
+      "name": "porder",
+      "description": "Vytvoření nákladové objednávky pro dodavatele na základě objednávek v iESO."
+    },
+    {
+      "name": "company",
+      "description": "Uložení firem do K2"
+    },
+    {
+      "name": "coorder",
+      "description": "Uložení informací o controllingové zakázce do K2"
+    },
+    {
+      "name": "createattachment",
+      "description": "Založení přílohy faktury v K2"
+    },
+    {
+      "name": "customers",
+      "description": "List of customers. The interface only allows you to update a set of customers. If a customer exists, it modifies its attributes, if customer does not exist, it adds new one."
+    },
+    {
+      "name": "finalinvoice",
+      "description": "Přidání nebo oprava finální faktury za odbytovou zakázku"
+    },
+    {
+      "name": "linkattachment",
+      "description": "Uložení přílohy pro konkrétní fakturu."
+    },
+    {
+      "name": "projects",
+      "description": "List of exhibition projects. The interface only allows you to update a set of projects. If a product exists, it modifies its attributes, if product does not exist, it adds new one."
+    },
+    {
+      "name": "psteam",
+      "description": "Tým ročníku akce"
+    },
+    {
+      "name": "sdemail",
+      "description": "Přenos emailu, na který se bude odesílat faktura"
+    },
+    {
+      "name": "sdorder",
+      "description": "Přenos odbytové zakázky - podklad pro fakturaci do K2"
+    },
+    {
+      "name": "sdresend",
+      "description": "Požadavek na znovu odeslání faktury"
+    }
+  ],
+  "paths": {
+    "/rentals/commission/{idCommission}": {
+      "get": {
+        "tags": [
+          "rentals"
+        ],
+        "summary": "Get rentals for a specific commission.",
+        "description": "Returns rentals (pujcenky) associated with the specified commission (cislem zakazky)",
+        "operationId": "getCommission",
+        "parameters": [
+          {
+            "name": "idCommission",
+            "in": "path",
+            "description": "ID of commission for the required rentals",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RentalsForCommission"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/inventory": {
+      "get": {
+        "tags": [
+          "inventory"
+        ],
+        "summary": "Získání aktuálních skladových cen",
+        "description": "Vrátí pole objektů obsahujících všech skladových cen v systému.",
+        "operationId": "getInventory",
+        "parameters": [
+          {
+            "name": "conditions",
+            "in": "query",
+            "description": "Hodnota timestamp je ve formátu 'yyyymmddhhmmss' a představuje datum a čas od kterého požadujeme přenést skladové ceny. (Například 20200214141808 je datum a čas 14.02.2020 14:18:08)",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": ".../coorderdet?conditions=timestamp;eq;20200214141808"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Inventory"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/showdoc": {
+      "get": {
+        "tags": [
+          "showdoc"
+        ],
+        "summary": "Získání dokumentu (faktury. přílohy nebo nákladové objednávky) ve formátu PDF.",
+        "description": "Vrátí dokument ve formátu PDF.",
+        "operationId": "getShowdoc",
+        "parameters": [
+          {
+            "name": "conditions",
+            "in": "query",
+            "description": "Podmínky filtrace ve formátu `typ dokumentu;eq;hodnota`",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "attachment;eq;hodnota1",
+                "invoice;eq;hodnota2",
+                "porder;eq;hodnota3"
+              ],
+              "example": ".../showdoc?conditions=invoice;eq;4124002723"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary",
+                  "example": "%PDF-1.7 %âăĎÓ 9 0 obj<</Linearized ..."
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          },
+          "404": {
+            "description": "Document not found"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/lasbe": {
+      "get": {
+        "tags": [
+          "lasbe"
+        ],
+        "summary": "Získání data posledního zpracování dokladů banky",
+        "operationId": "getLasbe",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Lasbe"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/coorderdet": {
+      "get": {
+        "tags": [
+          "coorderdet"
+        ],
+        "summary": "Získání detailních skutečných nákladů a výnosů pro CO zakázku",
+        "description": "Vrátí pole objektů obsahujících data detailních skutečných nákladů na základě zadaných podmínek.",
+        "operationId": "getCoorderdet",
+        "parameters": [
+          {
+            "name": "conditions",
+            "in": "query",
+            "description": "Podmínky filtrace ve formátu `item;operator;value` oddělené čárkou. Mezi podmínkami je operátor AND",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": ".../coorderdet?conditions=commissionid;eq;hodnota1,typ;eq;hodnota2"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Coorderdet"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/listdocuments": {
+      "get": {
+        "tags": [
+          "listdocuments"
+        ],
+        "summary": "Získání seznamu faktur k odbytové zakázce",
+        "description": "Vrátí pole objektů obsahujících data z faktury k odbytové zakázce na základě zadaných podmínek.",
+        "operationId": "getListdocuments",
+        "parameters": [
+          {
+            "name": "conditions",
+            "in": "query",
+            "description": "Podmínky filtrace ve formátu `item;operator;value` oddělené čárkou. Mezi podmínkami je operátor AND",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": ".../listdocuments?conditions=commissionid;eq;hodnota1,typ;eq;hodnota2"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Listdocuments"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/debt": {
+      "get": {
+        "tags": [
+          "debt"
+        ],
+        "summary": "Získání seznamu nevyrovnaných dokladů",
+        "description": "Vrátí pole objektů obsahujících data nevyrovnaného dokladu na základě zadaných podmínek.",
+        "operationId": "getDebt",
+        "parameters": [
+          {
+            "name": "conditions",
+            "in": "query",
+            "description": "Podmínky filtrace ve formátu `item;operator;value` oddělené čárkou. Mezi podmínkami je operátor AND",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": ".../debt?conditions=extcisobj;eq;hodnota1,cisodbzak;eq;hodnota2,cisdokl;eq;hodnota3,cisodber;eq;hodnota4"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Debt"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/accenergy": {
+      "post": {
+        "tags": [
+          "accenergy"
+        ],
+        "summary": "Zaslání informací o spotřebě dle objednaných přívodů (elektřina, voda, vzduch). Vrací čísla založených dokladů v účetnictví.",
+        "operationId": "postAccenergy",
+        "requestBody": {
+          "description": "Předává pole objektů s podklady pro založení dokladu v účetnictví.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AccenergyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccenergyResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/company": {
+      "put": {
+        "tags": [
+          "company"
+        ],
+        "summary": "Updating existing company or adding new company if they do not exist.",
+        "description": "Update an existing company by sapid or insert new one",
+        "operationId": "putCompany",
+        "requestBody": {
+          "description": "Update an existing company in the store or insert a new one.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Company"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/projects": {
+      "put": {
+        "tags": [
+          "projects"
+        ],
+        "summary": "Updating existing projects or adding new projects if they do not exist.",
+        "description": "Update an existing projects by codeProd or insert new one",
+        "operationId": "putProjects",
+        "requestBody": {
+          "description": "Update an existing projects in the store or insert a new one.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Projects"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/coorder": {
+      "put": {
+        "tags": [
+          "coorder"
+        ],
+        "summary": "Uložení informací o controllingové zakázce do K2",
+        "operationId": "putCoorder",
+        "requestBody": {
+          "description": "Seznam jednotlivých controllingových zakázek",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Coorder"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/createattachment": {
+      "put": {
+        "tags": [
+          "createattachment"
+        ],
+        "summary": "Založení přílohy faktury v K2",
+        "operationId": "putCreateAttachment ",
+        "requestBody": {
+          "description": "Seznam jednotlivých příloh",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAttachment"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/revenue": {
+      "get": {
+        "tags": [
+          "revenue"
+        ],
+        "summary": "Získání aktuálních skladových cen",
+        "description": "Vrátí pole objektů obsahujících všech skladových cen v systému.",
+        "operationId": "getRevenue",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Revenue"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/customers": {
+      "put": {
+        "tags": [
+          "customers"
+        ],
+        "summary": "Updating existing customer or adding new customer if they do not exist.",
+        "description": "Update an existing customer by kunnr or insert new one",
+        "operationId": "putCustomers",
+        "requestBody": {
+          "description": "Update an existing customer in the store or insert a new one.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Customers"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/finalinvoice": {
+      "put": {
+        "tags": [
+          "finalinvoice"
+        ],
+        "summary": "Updating existing final invoice or adding new final invoice if they do not exist.",
+        "description": "Update an existing final invoice by vbeln or insert new one",
+        "operationId": "putFinalInvoice",
+        "requestBody": {
+          "description": "Update an existing final invoice in the store or insert a new one.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FinalInvoice"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/linkattachment": {
+      "put": {
+        "tags": [
+          "linkattachment"
+        ],
+        "summary": "Uložení přílohy pro konkrétní fakturu.",
+        "operationId": "putLinkAttachment",
+        "requestBody": {
+          "description": "Objekty s informacemi o propojení přílohy pro konkrétní fakturu.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LinkAttachment"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/porder": {
+      "post": {
+        "tags": [
+          "porder"
+        ],
+        "summary": "Vytvoření nákladové objednávky pro dodavatele na základě objednávek v iESO.",
+        "operationId": "postPorder",
+        "requestBody": {
+          "description": "Data potřebná pro vytvoření nákladové objednávky.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Porder"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/fnucetnistav": {
+      "post": {
+        "tags": [
+          "fnucetnistav"
+        ],
+        "summary": "Získá aktuálně platné počty produktů dle skladové evidence pro předané pole produktů. Je řešeno metodou POST, kvůli délce URL při velkém počtu požadovaných produktů. Funkčně se ale jedná o metodu GET",
+        "operationId": "getFNUcetniStav",
+        "requestBody": {
+          "description": "Předává pole dokladů, pro které se má vrátit stav počtů produktů.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FNUcetniStavRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FNUcetniStavResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/psteam": {
+      "put": {
+        "tags": [
+          "psteam"
+        ],
+        "summary": "Update nebo Insert týmu ročníku akce",
+        "description": "Update nebo Insert týmu ročníku akce",
+        "operationId": "putPsteam",
+        "requestBody": {
+          "description": "Přenášená data týmu",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Psteam"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/sdemail": {
+      "put": {
+        "tags": [
+          "sdemail"
+        ],
+        "summary": "Přidání nebo oprava emailu, na který se bude odesílat faktura",
+        "description": "Přidání nebo oprava emailu, na který se bude odesílat faktura",
+        "operationId": "putSdemail",
+        "requestBody": {
+          "description": "Update an existing email in the store or insert a new one.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sdemail"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/sdresend": {
+      "put": {
+        "tags": [
+          "sdresend"
+        ],
+        "summary": "Přenos požadavku na znovu odeslání faktury odběrateli",
+        "description": "Přenos požadavku na znovu odeslání faktury odběrateli",
+        "operationId": "putSdresend",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sdresend"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation"
+          },
+          "400": {
+            "$ref": "#/components/responses/ErrorOperation"
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    },
+    "/sdorder": {
+      "put": {
+        "tags": [
+          "sdorder"
+        ],
+        "summary": "Přenos odbytové zakázky - podklad pro fakturaci do K2.",
+        "description": "Přenos odbytové zakázky - podklad pro fakturaci do K2.",
+        "operationId": "putSdorder",
+        "requestBody": {
+          "description": "Update an existing sdorder in the store or insert a new one.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Sdorder"
+              }
+            }
+          },
+          "required": true
+        },
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/gopEnvTypeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopRequestDateTimeHeader"
+          },
+          {
+            "$ref": "#/components/parameters/gopUserLoginHeader"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SdorderSuccessResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SdorderErrorResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Client authentication failed"
+          }
+        },
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "responses": {
+      "ErrorOperation": {
+        "description": "Error operation",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Errors"
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "gopEnvTypeHeader": {
+        "name": "gopEnvType",
+        "in": "header",
+        "description": "Environment type",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/gopEnvType"
+        }
+      },
+      "gopRequestDateTimeHeader": {
+        "name": "gopRequestDateTime",
+        "in": "header",
+        "description": "Request date and time",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/gopRequestDateTime"
+        }
+      },
+      "gopUserLoginHeader": {
+        "name": "gopUserLogin",
+        "in": "header",
+        "description": "User login",
+        "required": true,
+        "schema": {
+          "$ref": "#/components/schemas/gopUserLogin"
+        }
+      }
+    },
+    "schemas": {
+      "gopEnvType": {
+        "type": "string",
+        "maxLength": 1,
+        "enum": [
+          "T",
+          "P"
+        ],
+        "example": "T",
+        "description": "Where the application is deployed. (T - test, P - production)"
+      },
+      "gopRequestDateTime": {
+        "type": "string",
+        "example": "2023-01-16T14:05:08.528",
+        "maxLength": 23,
+        "description": "The local date and local time when the transfer was made. Format 'YYYY-MM-DDTHH:MM:SS.SSS' (ISO 8601)"
+      },
+      "gopUserLogin": {
+        "type": "string",
+        "example": "jiri547",
+        "maxLength": 20,
+        "description": "Login of the user who made the transfer"
+      },
+      "RentalsForCommission": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RentalForCommission"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Projects": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Project"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Coorder": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoorderItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "CreateAttachment": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CreateAttachmentItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Customers": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Customer"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FinalInvoice": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FinalInvoiceItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "LinkAttachment": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkAttachmentItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Porder": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PorderItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FNUcetniStavRequest": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FNUcetniStavRequestItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Coorderdet": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CoorderdetItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Listdocuments": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ListdocumentsItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Inventory": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InventoryItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Lasbe": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LasbeItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "FNUcetniStavResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FNUcetniStavResponseItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Revenue": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RevenueItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Psteam": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PsteamItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Debt": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DebtItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "AccenergyRequest": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccenergyRequestItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "AccenergyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccenergyResponseItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Company": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CompanyItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Sdresend": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SdresendItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Sdemail": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SdemailItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "Sdorder": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SdorderItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SdorderSuccessResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SdorderSuccessResponseItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "SdorderErrorResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SdorderErrorResponseItem"
+            }
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
+      "RentalForCommission": {
+        "type": "object",
+        "properties": {
+          "codeProd": {
+            "type": "string",
+            "maxLength": 7,
+            "example": "104602",
+            "description": "Product code - identifies the product"
+          },
+          "nameProd": {
+            "type": "string",
+            "maxLength": 40,
+            "example": "Stojan vnitřní 600x150x250 mm",
+            "description": "Product name"
+          },
+          "quantity": {
+            "type": "number",
+            "description": "Product quantity",
+            "multipleOf": 0.01,
+            "example": "12"
+          },
+          "unit": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "KS",
+            "description": "Measurement unit"
+          },
+          "czkRental": {
+            "type": "number",
+            "description": "Rental fee in CZK. Format 10.2",
+            "multipleOf": 0.01,
+            "example": 850
+          }
+        },
+        "required": [
+          "codeProd",
+          "nameProd",
+          "quantity",
+          "unit",
+          "czkRental"
+        ]
+      },
+      "Project": {
+        "type": "object",
+        "properties": {
+          "projekt": {
+            "type": "string",
+            "maxLength": 15,
+            "example": "26091",
+            "description": "Označení projektu"
+          },
+          "sablona": {
+            "type": "string",
+            "maxLength": 24,
+            "example": "00001",
+            "description": "Šablona projektu"
+          },
+          "oznaceni": {
+            "type": "string",
+            "maxLength": 40,
+            "example": "Minerály I.",
+            "description": "Název projektu"
+          },
+          "d_zahmontaz": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20260522",
+            "description": "Zahájení montáže"
+          },
+          "d_zahakce": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20260523",
+            "description": "Zahájení akce"
+          },
+          "d_konakce": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20260524",
+            "description": "Konec akce"
+          },
+          "d_kondemontaz": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20260525",
+            "description": "Konec demontáže"
+          },
+          "vmp": {
+            "type": "number",
+            "maxLength": 8,
+            "example": 1516,
+            "description": "Osobní číslo VMP"
+          },
+          "mesto": {
+            "type": "string",
+            "maxLength": 60,
+            "example": "Brno - výstaviště",
+            "description": "Místo konání -město"
+          },
+          "stat": {
+            "type": "string",
+            "maxLength": 2,
+            "example": "CZ",
+            "description": "Místo konání - zkratka státu"
+          },
+          "login": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "",
+            "description": "Uživatel, který provádí zápis"
+          }
+        },
+        "required": [
+          "projekt",
+          "sablona",
+          "oznaceni",
+          "d_zahmontaz",
+          "d_zahakce",
+          "d_konakce",
+          "d_kondemontaz",
+          "vmp",
+          "login"
+        ]
+      },
+      "CreateAttachmentItem": {
+        "type": "object",
+        "properties": {
+          "transferid": {
+            "type": "integer",
+            "example": 163933,
+            "description": "Pořadové číslo přenosu"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "Potvrzení o umístění expozice",
+            "description": "Popis souboru"
+          },
+          "filename": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "SAP179131.pdf",
+            "description": "Název souboru"
+          },
+          "doknr": {
+            "type": "string",
+            "maxLength": 25,
+            "example": "",
+            "description": "Požadavek na zrušení - identifikace přílohy ve skladu dokumentů"
+          },
+          "dokar": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "",
+            "description": "Požadavek na zrušení - typ dokumentu"
+          },
+          "doktl": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "",
+            "description": "Požadavek na zrušení - dílčí dokument"
+          },
+          "dokvr": {
+            "type": "integer",
+            "example": 0,
+            "description": "Požadavek na zrušení - verze dokumentu"
+          },
+          "delete": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "",
+            "description": "Požadavek na zrušení"
+          }
+        },
+        "required": [
+          "transferid",
+          "text",
+          "filename"
+        ]
+      },
+      "CoorderItem": {
+        "type": "object",
+        "properties": {
+          "auart": {
+            "type": "string",
+            "maxLength": 0,
+            "example": "",
+            "description": "Druh zakázky - zatím neposíláme"
+          },
+          "aufnr": {
+            "type": "integer",
+            "example": 384832,
+            "description": "Zakázka"
+          },
+          "zzobor": {
+            "type": "string",
+            "maxLength": 18,
+            "example": "",
+            "description": "Obor"
+          },
+          "zzobch1": {
+            "type": "integer",
+            "example": 41697,
+            "description": "Obchodník plochy"
+          },
+          "zzobch2": {
+            "type": "integer",
+            "example": 41697,
+            "description": "Obchodník výstavby"
+          },
+          "zzpavilon": {
+            "type": "string",
+            "maxLength": 4,
+            "example": "200",
+            "description": "Pavilon - kód produktu"
+          },
+          "zzstanek": {
+            "type": "string",
+            "maxLength": 15,
+            "example": "",
+            "description": "Stánek"
+          },
+          "zzkunnr": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0046760000",
+            "description": "Zákazník"
+          },
+          "zzpspid": {
+            "type": "string",
+            "maxLength": 5,
+            "example": "24010",
+            "description": "Kód projektu"
+          },
+          "zztext": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "24010-MSV;zakázka 1. úsek",
+            "description": "Text"
+          },
+          "typucasti": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "S",
+              "V",
+              "T",
+              "L",
+              "R",
+              "I",
+              "P"
+            ],
+            "example": "P",
+            "description": "Typ účasti (S-Sběrná zakázka, V-Individuální výstavba, T-Typový balíček, L-Shell balíček, R-typový stánek, I-Interní servis, P-První úsek)"
+          },
+          "vel_plochy": {
+            "maxLength": 10,
+            "example": "",
+            "description": "Velikost plochy"
+          },
+          "typprod": {
+            "type": "string",
+            "maxLength": 4,
+            "example": "KP",
+            "description": "Typ produktu (např. KP - Krytá plocha)"
+          },
+          "zahakce": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20241008",
+            "description": "Datum zahájení akce"
+          },
+          "ss_obchodnik": {
+            "type": "integer",
+            "example": "41697",
+            "description": "Obchodník (složka služeb)"
+          },
+          "ss_rozpoctar": {
+            "type": "integer",
+            "example": "41697",
+            "description": "Rozpočtář (složka služeb)"
+          },
+          "ss_technik": {
+            "type": "integer",
+            "example": "",
+            "description": "Technik (složka služeb)"
+          },
+          "ss_produkcni": {
+            "type": "integer",
+            "maxLength": 10,
+            "example": "2089",
+            "description": "Produkční (složka služeb)"
+          },
+          "ss_refvr": {
+            "type": "integer",
+            "maxLength": 10,
+            "example": "41709",
+            "description": "Referent VŘ (složka služeb)"
+          },
+          "ss_intproj": {
+            "type": "integer",
+            "maxLength": 10,
+            "example": "",
+            "description": "Interní projektant (složka služeb)"
+          },
+          "ss_extproj": {
+            "type": "integer",
+            "maxLength": 10,
+            "example": "",
+            "description": "Externí projektant (složka služeb)"
+          },
+          "ss_assistob": {
+            "type": "integer",
+            "maxLength": 10,
+            "example": "",
+            "description": "Asistentka OB (složka služeb)"
+          },
+          "konakce": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20241011",
+            "description": "Datum ukončení akce"
+          },
+          "zacmont": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20240927",
+            "description": "Datum zahájení montáže"
+          },
+          "konmont": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20241007",
+            "description": "Konec montáže"
+          },
+          "zacdemont": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20241012",
+            "description": "Datum zahájení demontáže"
+          },
+          "kondemont": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20241016",
+            "description": "Konec demontáže"
+          },
+          "projvyrdo": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "",
+            "description": "Projekt a výroba do data"
+          },
+          "baldoprdo": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "",
+            "description": "Balení a doprava do data"
+          },
+          "navratmatdo": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "",
+            "description": "Návrat materiálu na BVV do data"
+          },
+          "zztypvyst": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "",
+            "description": "Typ výstavby"
+          },
+          "zzss": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "",
+              "X"
+            ],
+            "example": "X",
+            "description": "Existuje složka služeb"
+          },
+          "zzstorno": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "",
+              "X"
+            ],
+            "example": "",
+            "description": "Požadavek stornován"
+          },
+          "zzbalicek": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "",
+              "X"
+            ],
+            "example": "",
+            "description": "Balíček"
+          },
+          "zzbarter": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "",
+              "X"
+            ],
+            "example": "",
+            "description": "Barter"
+          },
+          "zzpoj": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "",
+            "description": "Atribut pojištění"
+          },
+          "zzstavr": {
+            "type": "integer",
+            "maxLength": 10,
+            "example": 3,
+            "description": "Stav realizace"
+          },
+          "zzstavitel": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "",
+            "description": "Stavitel"
+          },
+          "zzvelakce": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "M",
+              "S",
+              "V"
+            ],
+            "example": "V",
+            "description": "Velikost akce"
+          },
+          "zzsalkl": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "",
+            "description": "Třída odbytu"
+          }
+        },
+        "required": [
+          "auart",
+          "aufnr",
+          "zztext"
+        ]
+      },
+      "Customer": {
+        "type": "object",
+        "properties": {
+          "kunnr": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0008419000",
+            "description": "Číslo odběratele"
+          },
+          "adrnr": {
+            "type": "string",
+            "maxLength": 9,
+            "example": "",
+            "description": "Adresa"
+          },
+          "stcd1": {
+            "type": "string",
+            "maxLength": 20,
+            "example": "CZ45273545",
+            "description": "Daňové číslo 1 DIC"
+          },
+          "stcd2": {
+            "type": "string",
+            "maxLength": 11,
+            "example": "45273545",
+            "description": "Daňové číslo 2 ICO"
+          },
+          "stceg": {
+            "type": "string",
+            "maxLength": 20,
+            "example": "CZ45273545",
+            "description": "Identifikační číslo DPH"
+          },
+          "stkzn": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "",
+            "description": "Fyzická osoba"
+          },
+          "name1": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "AB EFEKT spol. s r.o.",
+            "description": "name1"
+          },
+          "name2": {
+            "type": "string",
+            "maxLength": 100,
+            "example": "",
+            "description": "name2"
+          },
+          "street": {
+            "type": "string",
+            "maxLength": 48,
+            "example": "Novosuchdolská 40/411",
+            "description": "street"
+          },
+          "post_code1": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "165 00",
+            "description": "PSČ"
+          },
+          "city1": {
+            "type": "string",
+            "maxLength": 48,
+            "example": "Praha 6",
+            "description": ""
+          },
+          "country": {
+            "type": "string",
+            "maxLength": 2,
+            "example": "CZ",
+            "description": ""
+          },
+          "po_box": {
+            "type": "string",
+            "maxLength": 0,
+            "example": "",
+            "description": "V GOP není předá se prázdná hodnota"
+          },
+          "langu": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "C",
+            "description": ""
+          },
+          "tel_number": {
+            "type": "string",
+            "maxLength": 90,
+            "example": "+420283841981",
+            "description": ""
+          },
+          "fax_number": {
+            "type": "string",
+            "maxLength": 90,
+            "example": "+420283841981",
+            "description": ""
+          },
+          "fakt_mail": {
+            "type": "string",
+            "maxLength": 60,
+            "example": "",
+            "description": "Email pro zasílání faktur"
+          },
+          "kunnr_master": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "",
+            "description": "Nadřízená firma (její kunnr)"
+          },
+          "cassd": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "",
+              "X"
+            ],
+            "example": "",
+            "description": "Blokace firmy ('X' - blokována, 'neblokována')"
+          },
+          "login": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "JNovak",
+            "description": "Kdo editoval nebo přidal odběratele"
+          },
+          "vbund": {
+            "type": "string",
+            "maxLength": 6,
+            "example": "",
+            "description": "Společnost"
+          },
+          "salesarea": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kunnr": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "description": "Odběratel (ID)",
+                  "example": "0008419000"
+                },
+                "waers": {
+                  "type": "string",
+                  "maxLength": 3,
+                  "description": "Defaultní měna dokladu (pokud není žádná měna explicitně zadána)",
+                  "example": "CZK"
+                },
+                "taxkd": {
+                  "type": "string",
+                  "maxLength": 1,
+                  "enum": [
+                    "1",
+                    "2"
+                  ],
+                  "description": "'2' - Firma je mimo EU a neni registrovaná k podnikání, '1' - v ostatních případech",
+                  "example": "1"
+                }
+              },
+              "required": [
+                "kunnr"
+              ]
+            }
+          },
+          "bnka": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "kunnr": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "description": "Odběratel (ID)",
+                  "example": "0008419000"
+                },
+                "banks": {
+                  "type": "string",
+                  "maxLength": 2,
+                  "description": "Kód státu banky",
+                  "example": "CZ"
+                },
+                "bankl": {
+                  "type": "string",
+                  "maxLength": 4,
+                  "description": "Kód banky",
+                  "example": "0800"
+                },
+                "bankn": {
+                  "type": "string",
+                  "maxLength": 34,
+                  "description": "Číslo bank.účtu",
+                  "example": "161005339"
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "kunnr",
+          "name1",
+          "country",
+          "login",
+          "salesarea",
+          "bnka"
+        ]
+      },
+      "FinalInvoiceItem": {
+        "type": "object",
+        "properties": {
+          "vbeln": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "1124003747",
+            "description": "Č. odbytové zakázky"
+          },
+          "bstdk": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20240610",
+            "description": "Datum objednávky"
+          },
+          "fkdat": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20240610",
+            "description": "Datum objednávky"
+          },
+          "varsymbol": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "",
+            "description": "Požadovaný var.symbol"
+          }
+        },
+        "required": [
+          "vbeln",
+          "bstdk",
+          "fkdat"
+        ]
+      },
+      "FNUcetniStavRequestItem": {
+        "type": "object",
+        "properties": {
+          "matnr": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "100120",
+            "description": "Kód produktu"
+          }
+        },
+        "required": [
+          "matnr"
+        ]
+      },
+      "AccenergyRequestItem": {
+        "type": "object",
+        "properties": {
+          "kstar": {
+            "type": "string",
+            "maxLength": 10,
+            "enum": [
+              "E9050-006",
+              "E9050-003",
+              "E9050-002"
+            ],
+            "example": "842003",
+            "description": "Nákl. Druh (E9050-006 - Elektřina, E9050-003 - Voda, E9050-002 - Stlačený vzduch)"
+          },
+          "kostl": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "B62114",
+            "description": "CO zakázka plochy"
+          },
+          "epspnr": {
+            "type": "string",
+            "maxLength": 24,
+            "example": "24027-E9050-003",
+            "description": "SPP prvek"
+          },
+          "wtgbtr": {
+            "type": "number",
+            "maxLength": 16,
+            "multipleOf": 2,
+            "example": 253.68,
+            "description": "Částka"
+          },
+          "eaufnr": {
+            "type": "integer",
+            "maxLength": 10,
+            "example": 383259,
+            "description": "Zakázka"
+          }
+        },
+        "required": [
+          "kstar",
+          "kostl",
+          "epspnr",
+          "wtgbtr",
+          "eaufnr"
+        ]
+      },
+      "LinkAttachmentItem": {
+        "type": "object",
+        "properties": {
+          "sapobject": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "VBRK",
+            "enum": [
+              "VBRK"
+            ],
+            "description": "Identifikace"
+          },
+          "invoice": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "4124002854",
+            "description": "Číslo faktury"
+          },
+          "documents": {
+            "type": "array",
+            "description": "",
+            "items": {
+              "type": "object",
+              "properties": {
+                "doknr": {
+                  "type": "string",
+                  "maxLength": 25,
+                  "description": "Identifikace přílohy ve skladu dokumentů",
+                  "example": "0000000000000010000168607"
+                },
+                "dokar": {
+                  "type": "string",
+                  "maxLength": 3,
+                  "description": "Typ dokumentu",
+                  "example": "ZFP"
+                },
+                "doktl": {
+                  "type": "string",
+                  "maxLength": 3,
+                  "description": "Dílčí dokument",
+                  "example": "000"
+                },
+                "dokvr": {
+                  "type": "integer",
+                  "maxLength": 10,
+                  "description": "Verze dokumentu",
+                  "example": 0
+                }
+              }
+            }
+          }
+        },
+        "required": [
+          "sapobject",
+          "invoice"
+        ]
+      },
+      "PorderItem": {
+        "type": "object",
+        "properties": {
+          "lifnr": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0000000884",
+            "description": "Dodavatel"
+          },
+          "bedat": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20240613",
+            "description": "Datum dokladu (RRRRMMDD)"
+          },
+          "items": {
+            "type": "array",
+            "description": "",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ebelp": {
+                  "type": "integer",
+                  "maxLength": 10,
+                  "description": "Pořadové číslo položky dokladu",
+                  "example": 1
+                },
+                "matnr": {
+                  "type": "string",
+                  "maxLength": 8,
+                  "description": "Číslo materiálu",
+                  "example": "E100105"
+                },
+                "txz01": {
+                  "type": "string",
+                  "maxLength": 40,
+                  "description": "Krátký text",
+                  "example": "Elektro přívod Max. 2,2 kW/230V (do 10A)"
+                },
+                "menge": {
+                  "type": "number",
+                  "maxLength": 16,
+                  "multipleOf": 2,
+                  "description": "Objednací množství",
+                  "example": 21
+                },
+                "meins": {
+                  "type": "string",
+                  "maxLength": 3,
+                  "description": "Měrná jednotka",
+                  "example": "KS"
+                },
+                "netpr": {
+                  "type": "number",
+                  "maxLength": 16,
+                  "multipleOf": 2,
+                  "description": "Jednotková cena produktu",
+                  "example": 32320
+                },
+                "ps_posid": {
+                  "type": "string",
+                  "maxLength": 24,
+                  "description": "Prvek SPP",
+                  "example": "24010- E9050-004"
+                },
+                "aufnr": {
+                  "type": "integer",
+                  "maxLength": 10,
+                  "description": "Zakázka",
+                  "example": 364125
+                }
+              },
+              "required": [
+                "ebelp",
+                "matnr",
+                "txz01",
+                "menge",
+                "meins",
+                "netpr",
+                "ps_posid",
+                "aufnr"
+              ]
+            }
+          }
+        },
+        "required": [
+          "lifnr",
+          "bedat"
+        ]
+      },
+      "CoorderdetItem": {
+        "type": "object",
+        "properties": {
+          "aufnr": {
+            "type": "integer",
+            "maxLength": 10,
+            "example": "371812",
+            "description": "Zakázka"
+          },
+          "kokrs": {
+            "type": "string",
+            "maxLength": 4,
+            "example": "BVV0",
+            "description": "Nákladový okruh"
+          },
+          "belnr": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0101092854",
+            "description": "Číslo dokladu"
+          },
+          "gjahr": {
+            "type": "integer",
+            "maxLength": 4,
+            "example": 2023,
+            "description": "Fiskální rok"
+          },
+          "budat": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "2023-02-28",
+            "description": "Datum účtování"
+          },
+          "refbt": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "R",
+            "description": "Typ referenčního nákupního dokladu"
+          },
+          "refbn": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "4923000966",
+            "description": "Číslo nák. dokladu"
+          },
+          "beknz": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "S",
+            "description": "Znak MD/Dal (H = MD, S=Dal)"
+          },
+          "bwaer": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "CZK",
+            "description": "Firemní měna"
+          },
+          "sgtxt": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "",
+            "description": "Text úč. dokladu"
+          },
+          "ebeln": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "",
+            "description": "Číslo objednávky"
+          },
+          "ebtxt": {
+            "type": "string",
+            "maxLength": 20,
+            "example": "",
+            "description": "Text objednávky"
+          },
+          "gkont": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0000132240",
+            "description": "Číslo protiúčtu"
+          },
+          "gkoar": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "M",
+            "description": "Typ protiúčtu"
+          },
+          "gkont_ktxt": {
+            "type": "string",
+            "maxLength": 35,
+            "example": "",
+            "description": "Krátký text protiúčtu"
+          },
+          "gkont_ltxt": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "",
+            "description": "Dlouhý text protiúčtu"
+          },
+          "kstar": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0000501100",
+            "description": "Náhladový druh (číslo účtu HK)"
+          },
+          "cel_ktxt": {
+            "type": "string",
+            "maxLength": 20,
+            "example": "Spotřeba mat.zákl.",
+            "description": "Krátký popis ND"
+          },
+          "cel_ltxt": {
+            "type": "string",
+            "maxLength": 40,
+            "example": "Spotřeba materiálu základní na stř.",
+            "description": "Dlouhý popis ND"
+          },
+          "matnr": {
+            "type": "string",
+            "maxLength": 18,
+            "example": "000000000000413415",
+            "description": "Kód materiálu"
+          },
+          "mat_txt": {
+            "type": "string",
+            "maxLength": 40,
+            "example": "Koberec VENUS 415 béžová tmavá 200cm",
+            "description": "Popis materiálu"
+          },
+          "wtgbtr": {
+            "type": "number",
+            "maxLength": 17,
+            "multipleOf": 3,
+            "example": 1490.31,
+            "description": "Částka v měně transakce"
+          },
+          "wkgbtr": {
+            "type": "number",
+            "maxLength": 17,
+            "multipleOf": 3,
+            "example": 1490.31,
+            "description": "Částka ve firemní měně"
+          },
+          "twaer": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "",
+            "description": "Transakční měna"
+          }
+        },
+        "required": [
+          "aufnr"
+        ]
+      },
+      "LasbeItem": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20240624",
+            "description": "Datum posledního zpracování dokladů banky (RRRRMMDD)"
+          }
+        }
+      },
+      "InventoryItem": {
+        "type": "object",
+        "properties": {
+          "matnr": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "101025",
+            "description": "Kód produktu"
+          },
+          "value": {
+            "type": "number",
+            "maxLength": 15,
+            "multipleOf": 0.01,
+            "example": 21.93,
+            "description": "Aktuální skladová cena"
+          },
+          "currency": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "CZK",
+            "description": "Měna"
+          }
+        },
+        "required": [
+          "matnr",
+          "value",
+          "currency"
+        ]
+      },
+      "ListdocumentsItem": {
+        "type": "object",
+        "properties": {
+          "vbeln": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "1124001265",
+            "description": "Číslo odbytové zakázky"
+          },
+          "invoice": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "4124000962",
+            "description": "Číslo dokladu"
+          },
+          "fkart": {
+            "type": "string",
+            "maxLength": 4,
+            "example": "ZF2",
+            "description": "Typ dokladu (dobropis, vrubopis, faktura, záloha atd)"
+          },
+          "erdat": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20240209",
+            "description": "Datum vzniku dokladu (RRRRMMDD)"
+          },
+          "erzet": {
+            "type": "string",
+            "maxLength": 6,
+            "example": "153105",
+            "description": "Čas vzniku dokladu (HHMMSS)"
+          },
+          "fkdat": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20240209",
+            "description": "Datum vystavení dokladu (RRRRMMDD)"
+          },
+          "duedat": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20240210",
+            "description": "Datum splatnosti (RRRRMMDD)"
+          },
+          "bezdph": {
+            "type": "number",
+            "maxLength": 17,
+            "multipleOf": 0.02,
+            "example": "79517.43",
+            "description": "Částka bez DPH"
+          },
+          "betr": {
+            "type": "number",
+            "maxLength": 17,
+            "multipleOf": 0.02,
+            "example": "96216.00",
+            "description": "Částka s DPH"
+          },
+          "waers": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "CZK",
+            "description": "Měna"
+          },
+          "storno": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "X",
+              ""
+            ],
+            "example": "",
+            "description": "Příznak storna dokladu"
+          },
+          "kunnr": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0121297000",
+            "description": "Kód příjemce dokladu (faktury)"
+          },
+          "datvr": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "20240209 (RRRRMMDD)",
+            "description": "Datum zaslání elektronické faktury zákazníkovi"
+          },
+          "uhrvr": {
+            "type": "string",
+            "maxLength": 6,
+            "example": "230115",
+            "description": "Čas zaslání elektronické faktury zákazníkovi (HHMMSS)"
+          },
+          "zemail": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "office@sanubabu.cz",
+            "description": "Email, kam byla zaslána elektronická faktura emailem"
+          },
+          "last": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "X",
+              "F",
+              ""
+            ],
+            "example": "F",
+            "description": ""
+          },
+          "documents": {
+            "type": "array",
+            "description": "",
+            "items": {
+              "type": "object",
+              "properties": {
+                "doknr": {
+                  "type": "string",
+                  "maxLength": 25,
+                  "description": "Identifikace přílohy ve skladu dokumentů",
+                  "example": "0000000000000010000163508"
+                },
+                "dokar": {
+                  "type": "string",
+                  "maxLength": 3,
+                  "description": "Typ dokumentu",
+                  "example": "ZFP"
+                },
+                "doktl": {
+                  "type": "string",
+                  "maxLength": 3,
+                  "description": "Dílčí dokument",
+                  "example": "000"
+                },
+                "dokvr": {
+                  "type": "integer",
+                  "maxLength": 10,
+                  "description": "Verze dokumentu",
+                  "example": 0
+                },
+                "physid": {
+                  "type": "string",
+                  "maxLength": 32,
+                  "description": "ID pro SAP content server",
+                  "example": "65A481BA651A1730E1008000C0A8EAED"
+                },
+                "arcid": {
+                  "type": "string",
+                  "maxLength": 2,
+                  "description": "ID archivu",
+                  "example": "P5"
+                },
+                "compid": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "description": "Jméno souboru",
+                  "example": "SAP177398.pdf"
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 100,
+                  "description": "Popis souboru",
+                  "example": "Plán stánku"
+                }
+              },
+              "required": [
+                "doknr",
+                "dokar",
+                "doktl",
+                "dokvr",
+                "physid",
+                "arcid",
+                "compid"
+              ]
+            }
+          }
+        },
+        "required": [
+          "vbeln",
+          "invoice",
+          "fkart",
+          "erdat",
+          "erzet",
+          "fkdat",
+          "duedat",
+          "bezdph",
+          "betr",
+          "waers",
+          "kunnr"
+        ]
+      },
+      "AccenergyResponseItem": {
+        "type": "object",
+        "properties": {
+          "docnumber": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0300080538",
+            "description": "Doklad v účetnictví"
+          }
+        },
+        "required": [
+          "docnumber"
+        ]
+      },
+      "FNUcetniStavResponseItem": {
+        "type": "object",
+        "properties": {
+          "matnr": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "101025",
+            "description": "Kód produktu"
+          },
+          "mnuct": {
+            "type": "number",
+            "maxLength": 15,
+            "example": 213,
+            "description": "Účetní stav produktů (množství)"
+          },
+          "meins": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "KS",
+            "description": "Měrná jednotka"
+          }
+        },
+        "required": [
+          "matnr",
+          "mnuct",
+          "mains"
+        ]
+      },
+      "RevenueItem": {
+        "type": "object",
+        "properties": {
+          "aufnr": {
+            "type": "integer",
+            "maxLength": 0,
+            "example": 372285,
+            "description": "Zakázka"
+          },
+          "vyn_plocha": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Skutečné výnosy za plochu"
+          },
+          "vyn_vystavba": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Skutečné výnosy za výstavbu"
+          },
+          "vyn_tvrdesl": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Skutečné výnosy za tvrdé služby"
+          },
+          "vyn_venrekl": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Skutečné výnosy za venkovní reklamu"
+          },
+          "vyn_neprime": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Skutečné nepřímé výnosy"
+          },
+          "nak_plocha": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Skutečné náklady za plochu"
+          },
+          "nak_vystavba": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 1614.24,
+            "description": "Skutečné náklady za výstavbu"
+          },
+          "nak_tvrdesl": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Skutečné náklady za tvrdé služby"
+          },
+          "nak_venrekl": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Skutečné náklady za venkovní reklamu"
+          },
+          "nak_neprime": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Skutečné nepřímé náklady"
+          },
+          "obl_plocha": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Obligo náklady za plochu"
+          },
+          "obl_vystavba": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 4200,
+            "description": "Obligo náklady za výstavbu"
+          },
+          "obl_tvrdesl": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Obligo náklady za tvrdé služby"
+          },
+          "obl_venrekl": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Obligo nepřímé náklady"
+          },
+          "obl_neprime": {
+            "type": "number",
+            "multipleOf": 2,
+            "maxLength": 15,
+            "example": 0,
+            "description": "Obligo náklady za venkovní reklamu"
+          }
+        },
+        "required": [
+          "aufnr"
+        ]
+      },
+      "PsteamItem": {
+        "type": "object",
+        "properties": {
+          "projekt": {
+            "type": "string",
+            "maxLength": 5,
+            "example": "24059",
+            "description": "Označení projektu - RRAAA (RR - ročníka akce, AAA - Kód akce)"
+          },
+          "team": {
+            "type": "array",
+            "description": "Tým, která má na starosti ročník akce (v současnosti se zasílá vždy pouze jeden tým)",
+            "items": {
+              "type": "object",
+              "properties": {
+                "oscislo": {
+                  "type": "integer",
+                  "maxLength": 10,
+                  "description": "Osobní číslo zaměstnance",
+                  "example": "1725"
+                },
+                "plan": {
+                  "type": "number",
+                  "maxLength": 21,
+                  "multipleOf": 0.02,
+                  "description": "Plán na obchodníka plochy",
+                  "example": ""
+                },
+                "vize": {
+                  "type": "number",
+                  "maxLength": 21,
+                  "multipleOf": 0.02,
+                  "description": "Vize plánu na obchodníka plochy",
+                  "example": ""
+                },
+                "vmp": {
+                  "type": "string",
+                  "maxLength": 1,
+                  "enum": [
+                    "",
+                    "X"
+                  ],
+                  "description": "Příznak VMP (Vedoucí manažer projektu)",
+                  "example": ""
+                },
+                "vyuzit": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "od": {
+                        "type": "string",
+                        "maxLength": 8,
+                        "description": "Využití zaměstnance od data",
+                        "example": "20241011"
+                      },
+                      "do": {
+                        "type": "string",
+                        "maxLength": 8,
+                        "description": "Využití zaměstnance do data",
+                        "example": "20241011"
+                      }
+                    },
+                    "required": [
+                      "od",
+                      "do"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "oscislo"
+              ]
+            }
+          }
+        },
+        "required": [
+          "projekt",
+          "team"
+        ]
+      },
+      "CompanyItem": {
+        "type": "object",
+        "properties": {
+          "city": {
+            "type": "string",
+            "maxLength": 48,
+            "example": "Praha 10",
+            "description": "Město"
+          },
+          "ico": {
+            "type": "string",
+            "maxLength": 11,
+            "example": "48108375",
+            "description": "IČ"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 255,
+            "example": "AV MEDIA, a.s.",
+            "description": "Název firmy"
+          },
+          "postcode": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "102 00",
+            "description": "PSČ"
+          },
+          "sapid": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0013128000",
+            "description": "ID firmy"
+          },
+          "street": {
+            "type": "string",
+            "maxLength": 48,
+            "example": "Pražská 1335/63",
+            "description": "Ulice"
+          },
+          "clients": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "firstname": {
+                  "type": "string",
+                  "maxLength": 24,
+                  "description": "Jméno",
+                  "example": "Petr"
+                },
+                "lastname": {
+                  "type": "string",
+                  "maxLength": 35,
+                  "description": "Jméno",
+                  "example": "Barcal"
+                },
+                "mail": {
+                  "type": "string",
+                  "maxLength": 50,
+                  "description": "Mail",
+                  "example": "praha@avmedia.cz"
+                },
+                "phone": {
+                  "type": "string",
+                  "maxLength": 30,
+                  "description": "Telefon",
+                  "example": "+420261260218"
+                }
+              },
+              "required": [
+                "firstname",
+                "lastname",
+                "mail",
+                "phone"
+              ]
+            }
+          }
+        },
+        "required": [
+          "city",
+          "ico",
+          "name",
+          "postcode",
+          "sapid",
+          "street"
+        ]
+      },
+      "DebtItem": {
+        "type": "object",
+        "properties": {
+          "extcisobj": {
+            "type": "string",
+            "maxLength": 35,
+            "example": "PR280894",
+            "description": "Externí číslo objednávky"
+          },
+          "cisodbzak": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "1124000142",
+            "description": "'Císlo odbytové zakázky"
+          },
+          "cisloodbdokl": {
+            "type": "string",
+            "maxLength": 15,
+            "example": "",
+            "description": "Číslo odbytového dokladu"
+          },
+          "ucetokruh": {
+            "type": "string",
+            "maxLength": 4,
+            "example": "BVV1",
+            "description": "Účetní okruh"
+          },
+          "cisucdokl": {
+            "type": "string",
+            "maxLength": 15,
+            "example": "0200001095",
+            "description": "Číslo účetního dokladu"
+          },
+          "fiskrok": {
+            "type": "integer",
+            "maxLength": 4,
+            "example": 2024,
+            "description": "Fiskální rok"
+          },
+          "profcen": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0000599000",
+            "description": "Profitcentrum"
+          },
+          "druhdokl": {
+            "type": "string",
+            "maxLength": 2,
+            "example": "AB",
+            "description": "Druh dokladu"
+          },
+          "cisucrad": {
+            "type": "integer",
+            "maxLength": 10,
+            "example": 2,
+            "description": "Číslo řádku dokladu"
+          },
+          "datporiz": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "2024-01-16",
+            "description": "Datum vystavení dokladu"
+          },
+          "datsplat": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "2024-01-16",
+            "description": "Datum splatnosti"
+          },
+          "castkadokl": {
+            "type": "number",
+            "maxLength": 17,
+            "multipleOf": 0.01,
+            "example": -61500,
+            "description": "Částka dokladu"
+          },
+          "platpodminka": {
+            "type": "string",
+            "maxLength": 4,
+            "example": "",
+            "description": "Platební podmínka"
+          },
+          "zpusobplatby": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "",
+            "description": "Způsob platby"
+          },
+          "blokplatby": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "A",
+            "description": "Blokace platby"
+          },
+          "klicmeny": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "CZK",
+            "description": "Měna dokladu"
+          },
+          "castkafir": {
+            "type": "number",
+            "maxLength": 17,
+            "multipleOf": 0.01,
+            "example": -61500,
+            "description": "Částka ve měně BVV"
+          },
+          "sumaplateb": {
+            "type": "number",
+            "maxLength": 17,
+            "multipleOf": 0.01,
+            "example": 0,
+            "description": "Suma plateb"
+          },
+          "priznstor": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "",
+            "description": "Příznak storna dokladu"
+          },
+          "odberatel": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0337747000",
+            "description": "Kód zadavatele zakázky"
+          },
+          "obchodnik": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "00007943",
+            "description": "Obchodník"
+          },
+          "projekt": {
+            "type": "string",
+            "maxLength": 5,
+            "example": "",
+            "description": "Projekt"
+          },
+          "cisplatce": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0337747000",
+            "description": "Příjemce faktury"
+          },
+          "varsymbol": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "1124000142",
+            "description": "Variabilní symbol"
+          },
+          "datvr": {
+            "type": "string",
+            "maxLength": 8,
+            "example": "2024-01-17",
+            "description": "Datum zaslání elektronické faktury zákazníkovi"
+          },
+          "uhrvr": {
+            "type": "string",
+            "maxLength": 6,
+            "example": "040008",
+            "description": "Čas zaslání elektronické faktury zákazníkovi"
+          },
+          "zemail": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "fibu@mink-buersten.de",
+            "description": "Email, kam byla zaslána elektronická faktura emailem"
+          },
+          "payment_item": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "ucetokruh": {
+                  "type": "string",
+                  "maxLength": 4,
+                  "example": "BVV1",
+                  "description": "Účetní okruh"
+                },
+                "cisucdokl": {
+                  "type": "string",
+                  "maxLength": 15,
+                  "example": "0200001095",
+                  "description": "Číslo účetního dokladu"
+                },
+                "fiskrok": {
+                  "type": "integer",
+                  "maxLength": 4,
+                  "example": 2024,
+                  "description": "Fiskální rok"
+                },
+                "druhdokl": {
+                  "type": "string",
+                  "maxLength": 2,
+                  "example": "AB",
+                  "description": "Druh dokladu "
+                },
+                "datplat": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "example": "2024-01-15",
+                  "description": "Datum platby"
+                },
+                "klicmeny": {
+                  "type": "string",
+                  "maxLength": 3,
+                  "example": "CZK",
+                  "description": "Měna dokladu"
+                },
+                "castkaplat": {
+                  "type": "number",
+                  "maxLength": 17,
+                  "multipleOf": 0.01,
+                  "example": 61500,
+                  "description": "Částka platby"
+                },
+                "castkafir": {
+                  "type": "number",
+                  "maxLength": 17,
+                  "multipleOf": 0.01,
+                  "example": 61500,
+                  "description": "Částka ve měně BVV"
+                }
+              },
+              "required": [
+                "cisucdokl",
+                "druhdokl",
+                "datplat",
+                "klicmeny",
+                "castkaplat",
+                "castkafir"
+              ]
+            }
+          }
+        },
+        "required": [
+          "cisodbzak",
+          "profcen",
+          "druhdokl",
+          "cisucdokl",
+          "datporiz",
+          "datsplat",
+          "castkadokl",
+          "klicmeny",
+          "sumaplateb",
+          "odberatel",
+          "cisplatce"
+        ]
+      },
+      "SdresendItem": {
+        "type": "object",
+        "properties": {
+          "invoice": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "4124005354",
+            "description": "Číslo odbytové zakázky"
+          },
+          "send_now": {
+            "type": "string",
+            "maxLength": 1,
+            "enum": [
+              "x",
+              ""
+            ],
+            "example": "",
+            "description": "X - odeslat hned, '' - odeslat večer"
+          }
+        },
+        "required": [
+          "invoice"
+        ]
+      },
+      "SdemailItem": {
+        "type": "object",
+        "properties": {
+          "salesdocument": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "1108000100",
+            "description": "Číslo odbytové zakázky"
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 60,
+            "example": "zdeneksmrecek@seznam.cz",
+            "description": "Nová emailová adresa"
+          },
+          "cc": {
+            "type": "string",
+            "maxLength": 60,
+            "example": "",
+            "description": "Nové - adresa pro zaslání kopie emailu"
+          }
+        },
+        "required": [
+          "salesdocument",
+          "email"
+        ]
+      },
+      "SdorderItem": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "maxLength": 1,
+            "example": "",
+            "description": "Příznak operace (D - delete, jinak prázdný řetězec)"
+          },
+          "refnr": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "",
+            "description": "Číslo odbyt. zakázky - Plní se pouze při rušení"
+          },
+          "auart": {
+            "type": "string",
+            "maxLength": 4,
+            "example": "ZTZN",
+            "description": "Druh zakázky"
+          },
+          "vtweg": {
+            "type": "string",
+            "maxLength": 2,
+            "example": "01",
+            "description": "Cesta odbytu"
+          },
+          "kunnr": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0111173000",
+            "description": "Zadavatel zak."
+          },
+          "bstkd": {
+            "type": "string",
+            "maxLength": 15,
+            "example": "PR282334",
+            "description": ""
+          },
+          "bstdk": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "20240613",
+            "description": "Datum objednávky"
+          },
+          "kunnr_rg": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "0111173002",
+            "description": "Příjemce faktury"
+          },
+          "koein": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "CZK",
+            "description": "Měna ceny"
+          },
+          "menafakt": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "CZK",
+            "description": "Měna dokladu v níž bude tištěn"
+          },
+          "zterm": {
+            "type": "string",
+            "maxLength": 6,
+            "example": "",
+            "description": "Platební podmínka"
+          },
+          "text": {
+            "type": "string",
+            "maxLength": 50000,
+            "example": "",
+            "description": ""
+          },
+          "referent": {
+            "type": "number",
+            "example": 7943,
+            "description": ""
+          },
+          "manager": {
+            "type": "number",
+            "example": 2281,
+            "description": "Manažer realizace"
+          },
+          "user": {
+            "type": "number",
+            "example": 7943,
+            "description": "Aktuálně přihlášený uživatel"
+          },
+          "fkdat": {
+            "type": "string",
+            "maxLength": 10,
+            "example": "20240613",
+            "description": "Datum faktury (zdan.pln.)"
+          },
+          "fakt_mail": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "cz@shimadzu.eu.com",
+            "description": "Email kam zaslat fakturu"
+          },
+          "fakt_cc": {
+            "type": "string",
+            "maxLength": 50,
+            "example": "pavel.ondracek@shimadzu.eu.com",
+            "description": "Email kam zaslat kopii emailu s fakturou"
+          },
+          "cust_grp1": {
+            "type": "string",
+            "maxLength": 3,
+            "example": "E/N",
+            "enum": [
+              "E/N",
+              "E/P",
+              "N/N",
+              "N/P",
+              ""
+            ],
+            "description": "Akce s fakturou na straně SAP. Pokud '' je to 'E/P'"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "posgop": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "description": "Č. položky v GOP",
+                  "example": "1"
+                },
+                "matnr": {
+                  "type": "string",
+                  "maxLength": 7,
+                  "description": "Kód produktu",
+                  "example": "430"
+                },
+                "kwmeng": {
+                  "type": "number",
+                  "description": "Množství",
+                  "example": 16
+                },
+                "werks": {
+                  "type": "string",
+                  "maxLength": 4,
+                  "description": "",
+                  "example": "Závod"
+                },
+                "kbetr": {
+                  "type": "number",
+                  "multipleOf": 0.01,
+                  "description": "Cena",
+                  "example": 4950
+                },
+                "sleva": {
+                  "type": "number",
+                  "multipleOf": 0.01,
+                  "description": "Procento slevy",
+                  "example": 0
+                },
+                "prirazka": {
+                  "type": "number",
+                  "multipleOf": 0.01,
+                  "description": "Procento přirážky",
+                  "example": 0
+                },
+                "prirazka_abs": {
+                  "type": "number",
+                  "multipleOf": 0.01,
+                  "description": "Absolutní přirážka k celkové částce v dané měně",
+                  "example": 0
+                },
+                "patro": {
+                  "type": "number",
+                  "enum": [
+                    0,
+                    1
+                  ],
+                  "description": "Patro stánku",
+                  "example": 0
+                },
+                "text": {
+                  "type": "string",
+                  "maxLength": 50000,
+                  "description": "Bližší popis produktu",
+                  "example": "St. 067"
+                },
+                "barter": {
+                  "type": "string",
+                  "maxLength": 1,
+                  "enum": [
+                    "X",
+                    ""
+                  ],
+                  "description": "Barter",
+                  "example": ""
+                },
+                "coaufnr": {
+                  "type": "integer",
+                  "maxLength": 10,
+                  "description": "Kontrolingová zakázka",
+                  "example": 383274
+                },
+                "zterm": {
+                  "type": "string",
+                  "maxLength": 6,
+                  "description": "Platební podmínka",
+                  "example": ""
+                },
+                "printmatnr": {
+                  "type": "string",
+                  "maxLength": 30,
+                  "description": "",
+                  "example": "BL1"
+                },
+                "printskupina": {
+                  "type": "string",
+                  "maxLength": 50,
+                  "description": "Skupina pro seskupování více řádků v jeden při tisku.",
+                  "example": "768383"
+                }
+              },
+              "required": [
+                "posgop",
+                "matnr",
+                "kwmeng",
+                "kbetr",
+                "patro",
+                "coaufnr"
+              ]
+            }
+          },
+          "addressCPD": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "typ": {
+                  "type": "string",
+                  "maxLength": 2,
+                  "enum": [
+                    "AG",
+                    "WE",
+                    "RG"
+                  ],
+                  "description": "Typ adresy (AG-zadavatel zakazky, WE-prijemce tovaru, RG-platce)",
+                  "example": "AG"
+                },
+                "name": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Název firmy",
+                  "example": "CORAX, a.s."
+                },
+                "city": {
+                  "type": "string",
+                  "maxLength": 60,
+                  "description": "Město",
+                  "example": "Beroun"
+                },
+                "postl_cod1": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "description": "PSČ",
+                  "example": "266 01"
+                },
+                "ico": {
+                  "type": "string",
+                  "maxLength": 11,
+                  "description": "IČO",
+                  "example": "58743572"
+                },
+                "dic": {
+                  "type": "string",
+                  "maxLength": 16,
+                  "description": "DIČ",
+                  "example": "CZ58743572"
+                },
+                "po_box": {
+                  "type": "string",
+                  "maxLength": 40,
+                  "description": "PO BOX",
+                  "example": ""
+                },
+                "street": {
+                  "type": "string",
+                  "maxLength": 60,
+                  "description": "Ulice",
+                  "example": "Slámova 23"
+                },
+                "country": {
+                  "type": "string",
+                  "maxLength": 2,
+                  "description": "CZ",
+                  "example": ""
+                },
+                "langu": {
+                  "type": "string",
+                  "maxLength": 1,
+                  "description": "Stát",
+                  "example": "C"
+                },
+                "tel_number": {
+                  "type": "string",
+                  "maxLength": 30,
+                  "description": "",
+                  "example": "+420 602 786 245"
+                }
+              },
+              "required": [
+                "typ",
+                "name",
+                "city",
+                "country",
+                "langu"
+              ]
+            }
+          },
+          "finalinvoice": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "maxLength": 1,
+                  "enum": [
+                    "X",
+                    ""
+                  ],
+                  "description": "Zda provádět či ne (X - sekce provádí)",
+                  "example": "X"
+                },
+                "bstdk": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "description": "Datum objednávky",
+                  "example": "20240613"
+                },
+                "fkdat": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "description": "Datum faktury (zdan.pln)",
+                  "example": "20240613"
+                },
+                "varsymbol": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "description": "Požadovaný var. symbol",
+                  "example": "5782154725"
+                }
+              },
+              "required": [
+                "action"
+              ]
+            }
+          },
+          "listdocuments": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "action": {
+                  "type": "string",
+                  "maxLength": 1,
+                  "enum": [
+                    "X",
+                    ""
+                  ],
+                  "description": "Zda provádět či ne",
+                  "example": "X"
+                }
+              },
+              "required": [
+                "action"
+              ]
+            }
+          }
+        },
+        "required": [
+          "auart",
+          "vtweg",
+          "kunnr",
+          "bstkd",
+          "bstdk",
+          "kunnr_rg",
+          "menafakt",
+          "referent",
+          "fkdat"
+        ]
+      },
+      "SdorderSuccessResponseItem": {
+        "type": "object",
+        "properties": {
+          "salesdocument": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Číslo odbytové zakázky",
+            "example": "1124003513"
+          },
+          "listdocuments": {
+            "type": "array",
+            "description": "Dokumenty odbytové zakázky",
+            "items": {
+              "type": "object",
+              "properties": {
+                "invoice": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "description": "Číslo dokladu",
+                  "example": "4124005505"
+                },
+                "fkart": {
+                  "type": "string",
+                  "maxLength": 3,
+                  "description": "Typ dokladu (dobropis, vrubopis, faktura, záloha apod.)",
+                  "example": "ZF2"
+                },
+                "fkdat": {
+                  "type": "string",
+                  "maxLength": 8,
+                  "description": "Datum vystavení dokladu (RRRRMMDD)",
+                  "example": "20240613"
+                },
+                "duedat": {
+                  "type": "string",
+                  "maxLength": 8,
+                  "description": "Datum splatnosti (RRRRMMDD)",
+                  "example": "20240627"
+                },
+                "betr": {
+                  "type": "number",
+                  "maxLength": 10,
+                  "multipleOf": 0.01,
+                  "description": "částka s DPH",
+                  "example": 142054
+                },
+                "waers": {
+                  "type": "string",
+                  "maxLength": 3,
+                  "description": "Měna",
+                  "example": "CZK"
+                },
+                "bezdph": {
+                  "type": "number",
+                  "maxLength": 10,
+                  "multipleOf": 0.01,
+                  "description": "Částka bez DPH",
+                  "example": 117400
+                },
+                "storno": {
+                  "type": "string",
+                  "maxLength": 1,
+                  "enum": [
+                    "X",
+                    ""
+                  ],
+                  "description": "Příznak storna dokladu",
+                  "example": ""
+                },
+                "kunnr": {
+                  "type": "string",
+                  "maxLength": 10,
+                  "description": "Kód příjemce dokladu (faktury)",
+                  "example": "0111173002"
+                },
+                "erdat": {
+                  "type": "string",
+                  "maxLength": 8,
+                  "description": "Datum vzniku dokladu (RRRRMMDD)",
+                  "example": "20240613"
+                },
+                "erzet": {
+                  "type": "string",
+                  "maxLength": 6,
+                  "description": "Čas vzniku dokladu (HHMMSS)",
+                  "example": "155055"
+                },
+                "datvr": {
+                  "type": "string",
+                  "maxLength": 8,
+                  "description": "Datum zaslání elektronické faktury zákazníkovi (RRRRMMDD)",
+                  "example": ""
+                },
+                "uhrvr": {
+                  "type": "string",
+                  "maxLength": 6,
+                  "description": "Čas zaslání elektronické faktury zákazníkovi (HHMMSS)",
+                  "example": ""
+                },
+                "zemail": {
+                  "type": "string",
+                  "maxLength": 50,
+                  "description": "Email, kam byla zaslána elektronická faktura emailem",
+                  "example": ""
+                },
+                "last": {
+                  "type": "string",
+                  "maxLength": 1,
+                  "enum": [
+                    "Z",
+                    "F"
+                  ],
+                  "description": "Poslední doklad (Z - Záloha, F - Finální doklad)",
+                  "example": "F"
+                },
+                "attachments": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "doknr": {
+                        "type": "string",
+                        "maxLength": 25,
+                        "description": "Identifikace přílohy ve skladu dokumentů",
+                        "example": "0000000000000010000165466"
+                      },
+                      "dokar": {
+                        "type": "string",
+                        "maxLength": 3,
+                        "description": "Typ dokumentu",
+                        "example": "ZFP"
+                      },
+                      "doktl": {
+                        "type": "string",
+                        "maxLength": 3,
+                        "description": "Dílčí dokument",
+                        "example": "000"
+                      },
+                      "dokvr": {
+                        "type": "integer",
+                        "maxLength": 10,
+                        "description": "Verze dokumentu",
+                        "example": 0
+                      },
+                      "physid": {
+                        "type": "string",
+                        "maxLength": 32,
+                        "description": "ID pro SAP content server",
+                        "example": "65CA2F0676481040E1008000C0A8EAED"
+                      },
+                      "arcid": {
+                        "type": "string",
+                        "maxLength": 2,
+                        "description": "ID archivu",
+                        "example": "P5"
+                      },
+                      "compid": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "description": "Jméno souboru",
+                        "example": "SAP179164.pdf"
+                      },
+                      "text": {
+                        "type": "string",
+                        "maxLength": 100,
+                        "description": "Popis souboru",
+                        "example": "Plán stánku"
+                      }
+                    },
+                    "required": [
+                      "doknr",
+                      "dokar",
+                      "doktl",
+                      "dokvr",
+                      "physid",
+                      "arcid",
+                      "compid"
+                    ]
+                  }
+                }
+              },
+              "required": [
+                "invoice",
+                "fkart",
+                "fkdat",
+                "duedat",
+                "betr",
+                "waers",
+                "bezdph",
+                "kunnr",
+                "erdat",
+                "erzet"
+              ]
+            }
+          }
+        },
+        "required": [
+          "salesdocument",
+          "listdocuments"
+        ]
+      },
+      "SdorderErrorResponseItem": {
+        "type": "object",
+        "properties": {
+          "salesdocument": {
+            "type": "string",
+            "maxLength": 10,
+            "description": "Číslo odbytové zakázky",
+            "example": "1124003513"
+          },
+          "errors": {
+            "type": "array",
+            "description": "Seznam chyb",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errCode": {
+                  "type": "string",
+                  "description": "Kód chyby",
+                  "example": "Exxx"
+                },
+                "errMessage": {
+                  "type": "string",
+                  "description": "Popis chyby",
+                  "example": "Popis chyby..."
+                }
+              },
+              "required": [
+                "ererrCoderors",
+                "errMessage"
+              ]
+            }
+          }
+        },
+        "required": [
+          "salesdocument",
+          "errors"
+        ]
+      },
+      "Errors": {
+        "type": "object",
+        "properties": {
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "errCode": {
+                  "type": "string",
+                  "example": "E588"
+                },
+                "errMessage": {
+                  "type": "string",
+                  "example": "Chybná hodnota položky xxx"
+                }
+              },
+              "required": [
+                "errCode",
+                "errMessage"
+              ]
+            }
+          }
+        },
+        "required": [
+          "errors"
+        ]
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization"
+      }
+    }
+  }
+}
